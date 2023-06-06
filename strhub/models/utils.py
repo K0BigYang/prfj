@@ -56,6 +56,8 @@ def _get_model_class(key):
         from .trba.system import TRBC as ModelClass
     elif 'vitstr' in key:
         from .vitstr.system import ViTSTR as ModelClass
+    elif '411581003' in key or 'last' in key:
+        from .parseq.system import PARSeq as ModelClass
     else:
         raise InvalidModelError("Unable to find model class for '{}'".format(key))
     return ModelClass

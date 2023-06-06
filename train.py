@@ -60,18 +60,29 @@ def main(config: DictConfig):
     # If specified, use pretrained weights to initialize the model
     if config.pretrained is not None:
         model.load_state_dict(get_pretrained_weights(config.pretrained))
+        print("Load model succeed!!!")
     print(summarize(model, max_depth=1 if model.hparams.name.startswith('parseq') else 2))
 
     datamodule: SceneTextDataModule = hydra.utils.instantiate(config.data)
 
-    checkpoint = ModelCheckpoint(monitor='val_accuracy', mode='max', save_top_k=3, save_last=True,
-                                 filename='{epoch}-{step}-{val_accuracy:.4f}-{val_NED:.4f}')
+    checkpoint = ModelCheckpoint(
+        monitor='val_accuracy', 
+        mode='max', 
+        save_top_k=3, 
+        save_last=True,
+        filename='{epoch}-{step}-{val_accuracy:.4f}-{val_NED:.4f}',
+        save_on_train_epoch_end=True
+    )
     swa = StochasticWeightAveraging(swa_epoch_start=0.75)
     cwd = HydraConfig.get().runtime.output_dir if config.ckpt_path is None else \
         str(Path(config.ckpt_path).parents[1].absolute())
-    trainer: Trainer = hydra.utils.instantiate(config.trainer, logger=TensorBoardLogger(cwd, '', '.'),
-                                               strategy=trainer_strategy, enable_model_summary=False,
-                                               callbacks=[checkpoint, swa])
+    trainer: Trainer = hydra.utils.instantiate(
+        config.trainer, 
+        logger=TensorBoardLogger(cwd, '', '.'),
+        strategy=trainer_strategy, 
+        enable_model_summary=True,
+        callbacks=[checkpoint, swa]
+    )
     trainer.fit(model, datamodule=datamodule, ckpt_path=config.ckpt_path)
 
 

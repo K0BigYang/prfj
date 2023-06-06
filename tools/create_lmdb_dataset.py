@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#%%
 """ a modified version of CRNN torch repository https://github.com/bgshih/crnn/blob/master/tool/create_dataset.py """
 import io
 import os
@@ -41,8 +42,9 @@ def createDataset(inputPath, gtFile, outputPath, checkValid=True):
         data = f.readlines()
 
     nSamples = len(data)
-    for i, line in enumerate(data):
-        imagePath, label = line.strip().split(maxsplit=1)
+    for i, line in enumerate(data[1:]):
+        #imagePath, label = line.strip().split(maxsplit=1)
+        imagePath, label = line.strip().split(',')
         imagePath = os.path.join(inputPath, imagePath)
         with open(imagePath, 'rb') as f:
             imageBin = f.read()
@@ -75,4 +77,11 @@ def createDataset(inputPath, gtFile, outputPath, checkValid=True):
 
 
 if __name__ == '__main__':
-    fire.Fire(createDataset)
+    # %%
+    createDataset(
+        './data/train/',
+        './data/train/annotations.csv',
+        './data/train/real/',
+        checkValid=True
+    )
+# %%

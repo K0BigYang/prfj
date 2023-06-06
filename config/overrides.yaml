@@ -1,0 +1,2 @@
+- pretrained=parseq
+- trainer.max_epochs=10
